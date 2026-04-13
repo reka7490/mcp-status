@@ -1,16 +1,18 @@
 {
-  "updated_at": "2026-01-01T00:00:00Z",
+  "updated_at": "2026-04-13T19:33:13Z",
   "tunnels": {
     "bore": {
       "url": "http://bore.pub:48765/mcp",
       "healthy": false,
-      "last_check": "2026-01-01T00:00:00Z"
+      "last_check": "2026-04-13T19:33:13Z"
     },
     "lhr": {
-      "url": "",
-      "healthy": false,
-      "last_check": "2026-01-01T00:00:00Z"
+      "url": "https://1de9bac4a21aba.lhr.life/mcp",
+      "healthy": true,
+      "last_check": "2026-04-13T19:33:13Z"
     }
   },
-  "note": "Waiting for watchdog to start. Run setup_watchdog.sh on the server."
+  "server": {
+    "note": "MCP Media Generator — image/video generation"
+  }
 }
