@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>MCP Status</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 12px 0;
+        }
+        .header h1 {
+            font-size: 22px;
+            color: #58a6ff;
+            letter-spacing: -0.5px;
+        }
+        .header .subtitle {
+            font-size: 12px;
+            color: #484f58;
+            margin-top: 2px;
+        }
+        .updated {
+            text-align: center;
+            font-size: 12px;
+            color: #8b949e;
+            margin-bottom: 16px;
+            padding: 6px 12px;
+            background: #161b22;
+            border-radius: 20px;
+            display: inline-block;
+            width: 100%;
+        }
+        .updated .live-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3fb950;
+            margin-right: 4px;
+            animation: pulse 2s infinite;
+        }
+        .updated .dead-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #f85149;
+            margin-right: 4px;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            transition: border-color 0.2s;
+        }
+        .card.healthy { border-left: 3px solid #3fb950; }
+        .card.dead { border-left: 3px solid #f85149; }
+        .card.unknown { border-left: 3px solid #484f58; }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .card-icon { font-size: 18px; }
+        .card-name {
+            font-weight: 600;
+            font-size: 15px;
+            flex: 1;
+        }
+        .badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge.http { background: #da363322; color: #f85149; border: 1px solid #f8514933; }
+        .badge.https { background: #23863622; color: #3fb950; border: 1px solid #3fb95033; }
+        .badge.lan { background: #1f6feb22; color: #58a6ff; border: 1px solid #58a6ff33; }
+        .url-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+        .url-text {
+            flex: 1;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 12px;
+            color: #58a6ff;
+            word-break: break-all;
+            line-height: 1.4;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .url-text:active { color: #79c0ff; }
+        .copy-btn {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #8b949e;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            flex-shrink: 0;
+            transition: all 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .copy-btn:active { transform: scale(0.9); }
+        .copy-btn.copied {
+            background: #238636;
+            border-color: #238636;
+            color: #fff;
+        }
+        .status-text {
+            font-size: 11px;
+            color: #484f58;
+            margin-top: 6px;
+            padding-left: 2px;
+        }
+        .status-text .ok { color: #3fb950; }
+        .status-text .fail { color: #f85149; }
+        .section-label {
+            font-size: 11px;
+            color: #484f58;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 16px 0 8px 4px;
+            font-weight: 600;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #0d1117ee;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-top: 1px solid #21262d;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #484f58;
+        }
+        .footer .refresh-btn {
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #8b949e;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .footer .refresh-btn:active { background: #30363d; }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #484f58;
+        }
+        .empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
+        .empty-state .msg { font-size: 14px; line-height: 1.6; }
+        .toast {
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #238636;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>\uD83C\uDFAC MCP Generator</h1>
+        <div class="subtitle">tunnel status dashboard</div>
+    </div>
+    <div class="updated" id="updated">
+        <span class="dead-dot"></span> loading...
+    </div>
+    <div id="tunnels"></div>
+    <div class="toast" id="toast">Copied!</div>
+    <div class="footer">
+        <span id="countdown">refresh in 30s</span>
+        <button class="refresh-btn" onclick="refresh()">\u21BB Refresh now</button>
+    </div>
+
+    <script>
+    const REFRESH = 30;
+    let cd = REFRESH;
+    let lastData = null;
+
+    const META = {
+        bore:    { icon: '\uD83D\uDCF1', name: 'Phone (bore.pub)',   proto: 'http',  badge: 'HTTP'  },
+        lhr:     { icon: '\uD83C\uDF10', name: 'Web (localhost.run)', proto: 'https', badge: 'HTTPS' },
+        caddy_wifi:      { icon: '\uD83D\uDCBB', name: 'PC WiFi',    proto: 'https', badge: 'LAN'   },
+        caddy_tailscale: { icon: '\uD83D\uDD12', name: 'PC Tailscale', proto: 'https', badge: 'LAN'  },
+    };
+
+    // Try multiple sources for status.json
+    const SOURCES = [
+        './status.json',
+        'https://raw.githubusercontent.com/reka7490/mcp-status/main/status.json'
+    ];
+
+    async function loadStatus() {
+        for (const url of SOURCES) {
+            try {
+                const r = await fetch(url + '?t=' + Date.now(), { cache: 'no-store' });
+                if (!r.ok) continue;
+                const data = await r.json();
+                render(data);
+                lastData = data;
+                return;
+            } catch(e) { continue; }
+        }
+        document.getElementById('tunnels').innerHTML =
+            '<div class="empty-state"><div class="emoji">\uD83D\uDD0C</div>' +
+            '<div class="msg">Can\'t load status<br>Watchdog might not be running</div></div>';
+    }
+
+    function timeAgo(iso) {
+        const s = Math.round((Date.now() - new Date(iso).getTime()) / 1000);
+        if (s < 0) return 'just now';
+        if (s < 60) return s + 's ago';
+        if (s < 3600) return Math.floor(s/60) + 'm ago';
+        if (s < 86400) return Math.floor(s/3600) + 'h ago';
+        return Math.floor(s/86400) + 'd ago';
+    }
+
+    function render(data) {
+        // Header
+        const upd = document.getElementById('updated');
+        const ago = timeAgo(data.updated_at);
+        const anyHealthy = Object.values(data.tunnels||{}).some(t => t.healthy);
+        const dotClass = anyHealthy ? 'live-dot' : 'dead-dot';
+        upd.innerHTML = '<span class="' + dotClass + '"></span> updated ' + ago +
+            ' &middot; ' + new Date(data.updated_at).toLocaleTimeString();
+
+        // Cards
+        const el = document.getElementById('tunnels');
+        let html = '';
+        let hasRemote = false, hasLocal = false;
+
+        // Separate remote and local tunnels
+        for (const [k, t] of Object.entries(data.tunnels || {})) {
+            if (!t.url) continue;
+            const m = META[k] || { icon: '\uD83D\uDD17', name: k, proto: 'https', badge: 'HTTPS' };
+            const isLocal = k.startsWith('caddy');
+            if (isLocal && !hasLocal) { html += '<div class="section-label">Local (PC only)</div>'; hasLocal = true; }
+            if (!isLocal && !hasRemote) { html += '<div class="section-label">Remote tunnels</div>'; hasRemote = true; }
+
+            const hc = t.healthy ? 'healthy' : 'dead';
+            const statusHtml = t.healthy
+                ? '<span class="ok">\u2713 reachable</span>'
+                : '<span class="fail">\u2717 unreachable</span>';
+            const badgeClass = isLocal ? 'lan' : (m.proto === 'https' ? 'https' : 'http');
+
+            html += '<div class="card ' + hc + '">' +
+                '<div class="card-header">' +
+                    '<span class="card-icon">' + m.icon + '</span>' +
+                    '<span class="card-name">' + m.name + '</span>' +
+                    '<span class="badge ' + badgeClass + '">' + m.badge + '</span>' +
+                '</div>' +
+                '<div class="url-row">' +
+                    '<span class="url-text" onclick="copy(\'' + t.url + '\')">' + t.url + '</span>' +
+                    '<button class="copy-btn" onclick="copy(\'' + t.url + '\', this)">\uD83D\uDCCB</button>' +
+                '</div>' +
+                '<div class="status-text">' + statusHtml +
+                    (t.last_check ? ' &middot; checked ' + timeAgo(t.last_check) : '') +
+                '</div>' +
+            '</div>';
+        }
+
+        if (!html) {
+            html = '<div class="empty-state"><div class="emoji">\uD83D\uDE34</div>' +
+                '<div class="msg">No tunnels configured yet.<br>Start the watchdog on the server.</div></div>';
+        }
+        el.innerHTML = html;
+    }
+
+    function copy(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+            // Toast
+            const toast = document.getElementById('toast');
+            toast.textContent = 'Copied: ' + text;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 1500);
+            // Button feedback
+            if (btn) {
+                btn.classList.add('copied');
+                btn.textContent = '\u2713';
+                setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '\uD83D\uDCCB'; }, 1500);
+            }
+        }).catch(() => {
+            // Fallback for older browsers
+            const ta = document.createElement('textarea');
+            ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+        });
+    }
+
+    function refresh() {
+        cd = REFRESH;
+        loadStatus();
+    }
+
+    setInterval(() => {
+        cd--;
+        if (cd <= 0) { cd = REFRESH; loadStatus(); }
+        document.getElementById('countdown').textContent = 'refresh in ' + cd + 's';
+    }, 1000);
+
+    loadStatus();
+    </script>
+</body>
+</html>
