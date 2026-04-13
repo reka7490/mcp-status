@@ -1,15 +1,15 @@
 {
-  "updated_at": "2026-04-13T19:47:23Z",
+  "updated_at": "2026-04-13T19:48:17Z",
   "tunnels": {
     "bore": {
       "url": "http://bore.pub:48765/mcp",
       "healthy": false,
-      "last_check": "2026-04-13T19:47:23Z"
+      "last_check": "2026-04-13T19:48:17Z"
     },
     "lhr": {
       "url": "https://780e33dfe2252b.lhr.life/mcp",
       "healthy": true,
-      "last_check": "2026-04-13T19:47:23Z"
+      "last_check": "2026-04-13T19:48:17Z"
     }
   },
   "server": {
