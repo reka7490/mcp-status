@@ -1,15 +1,15 @@
 {
-  "updated_at": "2026-06-21T03:31:26Z",
+  "updated_at": "2026-06-21T03:32:42Z",
   "tunnels": {
     "bore": {
       "url": "",
       "healthy": false,
-      "last_check": "2026-06-21T03:31:26Z"
+      "last_check": "2026-06-21T03:32:42Z"
     },
     "lhr": {
       "url": "",
       "healthy": false,
-      "last_check": "2026-06-21T03:31:26Z"
+      "last_check": "2026-06-21T03:32:42Z"
     }
   },
   "server": {
